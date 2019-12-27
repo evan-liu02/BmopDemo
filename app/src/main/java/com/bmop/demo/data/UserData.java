@@ -7,8 +7,6 @@ public class UserData extends BmobObject {
     private String phone;
     private String password;
 
-    private BmobRelation speeches; // 发布的说说数据
-
     public String getPhone() {
         return phone;
     }
@@ -21,13 +19,6 @@ public class UserData extends BmobObject {
         return password;
     }
 
-    public BmobRelation getSpeeches() {
-        return speeches;
-    }
-
-    public void setSpeeches(BmobRelation speeches) {
-        this.speeches = speeches;
-    }
 
     public void setPassword(String password) {
         this.password = password;
@@ -38,7 +29,6 @@ public class UserData extends BmobObject {
         return "UserData{" +
                 "phone='" + phone + '\'' +
                 ", password='" + password + '\'' +
-                ", speeches=" + speeches +
                 '}';
     }
 }

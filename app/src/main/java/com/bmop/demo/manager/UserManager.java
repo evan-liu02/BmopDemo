@@ -1,12 +1,15 @@
 package com.bmop.demo.manager;
 
 import com.bmop.demo.data.FriendsData;
+import com.bmop.demo.data.SpeechData;
 import com.bmop.demo.data.UserData;
 import com.bmop.demo.utils.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.datatype.BmobPointer;
 import cn.bmob.v3.datatype.BmobQueryResult;
 import cn.bmob.v3.datatype.BmobRelation;
 import cn.bmob.v3.exception.BmobException;
@@ -18,6 +21,9 @@ import cn.bmob.v3.listener.UpdateListener;
 public class UserManager {
     private static UserManager self;
     private UserData currentUser;
+    private List<UserData> friends = new ArrayList<UserData>(); // 好友列表
+    private List<SpeechData> userSpeeches = new ArrayList<SpeechData>(); // 用户说说列表
+    private List<SpeechData> friendsSpeeches = new ArrayList<SpeechData>(); // 好友说说列表
 
     public static UserManager getInstance() {
         if (self == null) {
@@ -61,6 +67,15 @@ public class UserManager {
                 if (e == null) {
                     Logger.e(list.get(0).getObjectId() + "");
                     currentUser = list.get(0);
+
+                    BmobQuery<SpeechData> speechQuery = new BmobQuery<SpeechData>();
+                    speechQuery.addWhereEqualTo("author", currentUser);
+                    speechQuery.findObjects(new FindListener<SpeechData>() {
+                        @Override
+                        public void done(List<SpeechData> list, BmobException e) {
+                            Logger.e("user speeches: " + list);
+                        }
+                    });
                     /*SpeechData speechData = new SpeechData();
                     speechData.setContent("说说内容");
                     speechData.setAuthor(list.get(0));
@@ -77,6 +92,10 @@ public class UserManager {
 
     private UserData getCurrentUser() {
         return currentUser;
+    }
+
+    public List<UserData> getFriends() {
+        return friends;
     }
 
     public void addFriend(final UserData user) {
@@ -148,13 +167,44 @@ public class UserManager {
             public void done(List<FriendsData> list, BmobException e) {
                 if (e == null) {
                     if (list.size() > 0) {
-                        String bql = "select * from UserData where related friends to pointer('FriendsData', " + "'" + list.get(0).getObjectId() + "'" + ")";
+                        /*String bql = "select * from UserData where related friends to pointer('FriendsData', " + "'" + list.get(0).getObjectId() + "'" + ")";
                         Logger.e("bql: " + bql);
                         new BmobQuery<UserData>().doSQLQuery(bql, new SQLQueryListener<UserData>() {
                             @Override
                             public void done(BmobQueryResult<UserData> queryResult, BmobException e) {
                                 Logger.e("--" + e);
                                 queryResult.getResults();
+                            }
+                        });*/
+
+                        BmobQuery<UserData> userQuery = new BmobQuery<UserData>();
+                        userQuery.addWhereRelatedTo("friends", new BmobPointer(list.get(0)));
+                        userQuery.findObjects(new FindListener<UserData>() {
+                            @Override
+                            public void done(List<UserData> list, BmobException e) {
+                                if (list.size() > 0) {
+                                    friends.clear();
+                                    friends.addAll(list);
+                                    // 查询所有好友的说说数据
+                                    List<BmobQuery<SpeechData>> queries = new ArrayList<BmobQuery<SpeechData>>();
+                                    for (UserData userData : list) {
+                                        BmobQuery<SpeechData> speechQuery = new BmobQuery<SpeechData>();
+                                        speechQuery.addWhereEqualTo("author", userData);
+                                        queries.add(speechQuery);
+                                    }
+
+                                    BmobQuery<SpeechData> fQuery = new BmobQuery<SpeechData>();
+                                    fQuery.order("-updatedAt"); // 按更新时间排序
+                                    fQuery.include("author"); // 返回的数据包含用户信息
+                                    fQuery.or(queries);
+                                    fQuery.findObjects(new FindListener<SpeechData>() {
+                                        @Override
+                                        public void done(List<SpeechData> list, BmobException e) {
+                                            friendsSpeeches.clear();
+                                            friendsSpeeches.addAll(list);
+                                        }
+                                    });
+                                }
                             }
                         });
                     } else {

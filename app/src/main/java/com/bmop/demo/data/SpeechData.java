@@ -21,4 +21,12 @@ public class SpeechData extends BmobObject {
     public void setAuthor(UserData author) {
         this.author = author;
     }
+
+    @Override
+    public String toString() {
+        return "SpeechData{" +
+                "content='" + content + '\'' +
+                ", author=" + author +
+                '}';
+    }
 }
