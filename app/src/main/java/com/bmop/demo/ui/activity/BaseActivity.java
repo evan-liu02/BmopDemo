@@ -8,7 +8,11 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bmop.demo.manager.UserManager;
+
 public class BaseActivity extends AppCompatActivity {
+    protected UserManager userManager;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -16,6 +20,8 @@ public class BaseActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
+
+        userManager = UserManager.getInstance();
     }
 
     protected void intent2Activity(Class<? extends Activity> tarActivity) {

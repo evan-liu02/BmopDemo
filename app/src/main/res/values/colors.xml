@@ -8,6 +8,8 @@
     <color name="black">@android:color/black</color>
     <color name="transparent">@android:color/transparent</color>
     <color name="blue">#3377FF</color>
+    <color name="dark">#707070</color>
     <color name="colorLoginBg">#EFEFEF</color>
     <color name="colorEditText">#999999</color>
+    <color name="colorLayoutBg">#EEEEEE</color>
 </resources>

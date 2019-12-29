@@ -1,5 +1,7 @@
 package com.bmop.demo.manager;
 
+import android.text.TextUtils;
+
 import com.bmop.demo.data.FriendsData;
 import com.bmop.demo.data.SpeechData;
 import com.bmop.demo.data.UserData;
@@ -40,42 +42,74 @@ public class UserManager {
 
     }
 
-    public void register(String phone, String password) {
-        UserData userData = new UserData();
-        userData.setPhone(phone);
-        userData.setPassword(password);
-        userData.save(new SaveListener<String>() {
+    public void register(final String phone, final String password, final OnRegisterListener registerListener) {
+        BmobQuery<UserData> userQuery = new BmobQuery<UserData>();
+        userQuery.addWhereEqualTo("phone", phone);
+        userQuery.findObjects(new FindListener<UserData>() {
             @Override
-            public void done(String objectId, BmobException e) {
-                Logger.e(objectId);
+            public void done(List<UserData> list, BmobException e) {
                 if (e == null) {
-
+                    if (list.size() > 0) {
+                        Logger.e("手机号已被注册");
+                        if (registerListener != null) {
+                            registerListener.onRegisterFailed(OnRegisterListener.ERROR_HAS_USED);
+                        }
+                    } else {
+                        UserData userData = new UserData();
+                        userData.setPhone(phone);
+                        userData.setPassword(password);
+                        userData.save(new SaveListener<String>() {
+                            @Override
+                            public void done(String objectId, BmobException e) {
+                                if (e == null) {
+                                    if (registerListener != null) {
+                                        registerListener.onRegisterSuccess();
+                                    }
+                                } else {
+                                    if (registerListener != null) {
+                                        registerListener.onRegisterFailed(OnRegisterListener.ERROR_SERVER);
+                                    }
+                                }
+                            }
+                        });
+                    }
                 } else {
-
+                    Logger.e("注册失败");
+                    if (registerListener != null) {
+                        registerListener.onRegisterFailed(OnRegisterListener.ERROR_SERVER);
+                    }
                 }
             }
         });
     }
 
-    public void login(String phone, String password) {
+    public void login(String phone, final String password, final OnLoginListener loginListener) {
         BmobQuery<UserData> userQuery = new BmobQuery<UserData>();
         userQuery.addWhereEqualTo("phone", phone);
-//        userQuery.setLimit(1);
         userQuery.findObjects(new FindListener<UserData>() {
             @Override
             public void done(List<UserData> list, BmobException e) {
                 if (e == null) {
-                    Logger.e(list.get(0).getObjectId() + "");
-                    currentUser = list.get(0);
+                    if (list.size() > 0) {
+                        UserData user = list.get(0);
+                        if (TextUtils.equals(password, user.getPassword())) {
+                            currentUser = list.get(0);
 
-                    BmobQuery<SpeechData> speechQuery = new BmobQuery<SpeechData>();
-                    speechQuery.addWhereEqualTo("author", currentUser);
-                    speechQuery.findObjects(new FindListener<SpeechData>() {
-                        @Override
-                        public void done(List<SpeechData> list, BmobException e) {
-                            Logger.e("user speeches: " + list);
+                            if (loginListener != null) {
+                                loginListener.onLoginSuccess();
+                            }
+                        } else {
+                            Logger.e("密码不正确");
+                            if (loginListener != null) {
+                                loginListener.onLoginFailed(OnLoginListener.ERROR_WRONG_PASSWORD);
+                            }
                         }
-                    });
+                    } else {
+                        Logger.e("用户不存在");
+                        if (loginListener != null) {
+                            loginListener.onLoginFailed(OnLoginListener.ERROR_NO_USER);
+                        }
+                    }
                     /*SpeechData speechData = new SpeechData();
                     speechData.setContent("说说内容");
                     speechData.setAuthor(list.get(0));
@@ -85,6 +119,36 @@ public class UserManager {
                             Log.e("Test", s);
                         }
                     });*/
+                } else {
+                    Logger.e("登录失败");
+                    if (loginListener != null) {
+                        loginListener.onLoginFailed(OnLoginListener.ERROR_SERVER);
+                    }
+                }
+            }
+        });
+    }
+
+    // 获取登录用户发表的说说
+    public void getSpeeches(final OnObtainSpeechesListener speechesListener) {
+        if (currentUser == null) {
+            Logger.e("尚未登录");
+            return;
+        }
+        BmobQuery<SpeechData> speechQuery = new BmobQuery<SpeechData>();
+        speechQuery.addWhereEqualTo("author", currentUser);
+        speechQuery.findObjects(new FindListener<SpeechData>() {
+            @Override
+            public void done(List<SpeechData> list, BmobException e) {
+                Logger.e("user speeches: " + list);
+                if (e == null) {
+                    if (speechesListener != null) {
+                        speechesListener.onObtainSuccess(list);
+                    }
+                } else {
+                    if (speechesListener != null) {
+                        speechesListener.onObtainFailed();
+                    }
                 }
             }
         });
@@ -215,5 +279,30 @@ public class UserManager {
                 }
             }
         });
+    }
+
+    public interface OnLoginListener {
+        int ERROR_SERVER = -1;
+        int ERROR_NO_USER = 0;
+        int ERROR_WRONG_PASSWORD = 1;
+
+        void onLoginSuccess();
+
+        void onLoginFailed(int errorCode);
+    }
+
+    public interface OnRegisterListener {
+        int ERROR_SERVER = -1;
+        int ERROR_HAS_USED = 0;
+
+        void onRegisterSuccess();
+
+        void onRegisterFailed(int errorCode);
+    }
+
+    public interface OnObtainSpeechesListener {
+        void onObtainSuccess(List<SpeechData> speeches);
+
+        void onObtainFailed();
     }
 }
