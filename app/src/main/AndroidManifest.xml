@@ -23,7 +23,7 @@
             android:name=".ui.activity.RegisterActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".ui.activity.MainActivity"
+            android:name=".ui.activity.LoginActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,9 +32,9 @@
             </intent-filter>
         </activity>
 
-        <!--<activity
+        <activity
             android:name=".ui.activity.MainActivity"
-            android:screenOrientation="portrait" />-->
+            android:screenOrientation="portrait" />
 
         <provider
             android:name="cn.bmob.v3.util.BmobContentProvider"

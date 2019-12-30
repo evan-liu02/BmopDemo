@@ -7,10 +7,12 @@ import com.bmop.demo.data.SpeechData;
 import com.bmop.demo.data.UserData;
 import com.bmop.demo.utils.Logger;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.datatype.BmobFile;
 import cn.bmob.v3.datatype.BmobPointer;
 import cn.bmob.v3.datatype.BmobQueryResult;
 import cn.bmob.v3.datatype.BmobRelation;
@@ -19,6 +21,7 @@ import cn.bmob.v3.listener.FindListener;
 import cn.bmob.v3.listener.SQLQueryListener;
 import cn.bmob.v3.listener.SaveListener;
 import cn.bmob.v3.listener.UpdateListener;
+import cn.bmob.v3.listener.UploadFileListener;
 
 public class UserManager {
     private static UserManager self;
@@ -281,6 +284,39 @@ public class UserManager {
         });
     }
 
+    public void uploadFile(String filePath, final OnUploadListener uploadListener) {
+        if (TextUtils.isEmpty(filePath)) {
+            return;
+        }
+        final BmobFile bmobFile = new BmobFile(new File(filePath));
+        bmobFile.uploadblock(new UploadFileListener() {
+            @Override
+            public void done(BmobException e) {
+                if (e == null) {
+                    if (uploadListener != null) {
+                        uploadListener.onUploadSuccess(bmobFile.getFileUrl());
+                    }
+                } else {
+                    if (uploadListener != null) {
+                        uploadListener.onUploadFailed(-1);
+                    }
+                }
+            }
+        });
+    }
+
+    public void updateInfo() {
+        if (currentUser != null) {
+            currentUser.setNickname("test");
+            currentUser.update(new UpdateListener() {
+                @Override
+                public void done(BmobException e) {
+
+                }
+            });
+        }
+    }
+
     public interface OnLoginListener {
         int ERROR_SERVER = -1;
         int ERROR_NO_USER = 0;
@@ -304,5 +340,11 @@ public class UserManager {
         void onObtainSuccess(List<SpeechData> speeches);
 
         void onObtainFailed();
+    }
+
+    public interface OnUploadListener {
+        void onUploadSuccess(String url);
+
+        void onUploadFailed(int errorCode);
     }
 }

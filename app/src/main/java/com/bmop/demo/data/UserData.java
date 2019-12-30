@@ -8,9 +8,12 @@ public class UserData extends BmobObject {
     private String phone;
     private String password;
 
+    private String nickname;
     private String gender;
     private BmobDate birthday;
     private String avatar;
+    private String location;
+    private String career;
 
     public String getPhone() {
         return phone;
@@ -26,6 +29,14 @@ public class UserData extends BmobObject {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
 
     public String getGender() {
@@ -50,6 +61,22 @@ public class UserData extends BmobObject {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getCareer() {
+        return career;
+    }
+
+    public void setCareer(String career) {
+        this.career = career;
     }
 
     @Override

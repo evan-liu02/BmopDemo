@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bmop.demo.R;
 import com.bmop.demo.data.PersonalData;
+import com.bmop.demo.manager.UserManager;
 import com.bmop.demo.ui.activity.MainActivity;
 import com.bmop.demo.ui.adapter.MineAdapter;
 import com.bmop.demo.utils.Logger;
@@ -121,7 +122,7 @@ public class MineFragment extends BaseFragment implements View.OnClickListener {
         }
     }
 
-    public void updateAvatar(String photoPath) {
+    public void updateAvatar(final String photoPath) {
         if (TextUtils.isEmpty(photoPath)) {
             return;
         }
@@ -131,6 +132,18 @@ public class MineFragment extends BaseFragment implements View.OnClickListener {
                 if (loadedImage != null && !loadedImage.isRecycled()) {
                     Bitmap icon = createCircleIcon(loadedImage);
                     avatarBtn.setImageBitmap(icon);
+
+                    ((MainActivity)context).uploadFile(photoPath, new UserManager.OnUploadListener() {
+                        @Override
+                        public void onUploadSuccess(String url) {
+                            Logger.e("url: " + url);
+                        }
+
+                        @Override
+                        public void onUploadFailed(int errorCode) {
+
+                        }
+                    });
                 }
             }
         });

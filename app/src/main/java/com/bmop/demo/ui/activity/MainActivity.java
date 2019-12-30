@@ -18,6 +18,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.bmop.demo.R;
+import com.bmop.demo.manager.UserManager.OnUploadListener;
 import com.bmop.demo.ui.fragment.BaseFragment;
 import com.bmop.demo.ui.fragment.FriendsFragment;
 import com.bmop.demo.ui.fragment.MineFragment;
@@ -140,5 +141,9 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
         path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
         cursor.close();
         return path;
+    }
+
+    public void uploadFile(String filePath, OnUploadListener uploadListener) {
+        userManager.updateInfo();
     }
 }
