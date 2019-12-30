@@ -1,6 +1,10 @@
 package com.bmop.demo.ui.activity;
 
+import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -8,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -104,5 +109,36 @@ public class MainActivity extends BaseActivity implements BottomNavigationView.O
                 break;
         }
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                if (mCurrentFragment instanceof MineFragment) {
+                    ((MineFragment) mCurrentFragment).updateAvatar(getCurrentPhotoPath());
+                }
+            } else if (requestCode == REQUEST_PICK_IMAGE) {
+                if (data != null) {
+                    Uri imgUri = data.getData();
+                    currentPhotoPath = getPath(imgUri);
+                    ((MineFragment) mCurrentFragment).updateAvatar(getCurrentPhotoPath());
+                }
+            }
+        }
+    }
+
+    public String getPath(Uri uri) {
+        String path;
+        Cursor cursor = getContentResolver().query(uri,
+                new String[]{MediaStore.Images.Media.DATA}, null, null, null);
+        if (null == cursor) {
+            return null;
+        }
+        cursor.moveToFirst();
+        path = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+        cursor.close();
+        return path;
     }
 }

@@ -37,4 +37,16 @@
     <string name="new_friend">新朋友</string>
     <string name="my_friend">我的好友</string>
     <string name="upload_avatar">上传头像</string>
+    <string name="from_gallery">从相册选择</string>
+    <string name="take_photo">拍照</string>
+
+    <string-array name="personal_data">
+        <item>昵称</item>
+        <item>性别</item>
+        <item>生日</item>
+        <item>所在地</item>
+        <item>职业</item>
+        <item>签名</item>
+    </string-array>
+    <string name="select_time">选择时间</string>
 </resources>
